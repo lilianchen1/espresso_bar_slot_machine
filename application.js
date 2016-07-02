@@ -44,22 +44,23 @@ $.SlotGame = function() {
   };
 
   View.prototype.startGame = function() {
-    var slotItems = []
-    this.items.forEach(function(reel) {
-      var idx = Math.floor(Math.random() * 3);
-      slotItems.push(reel[idx]);
-    });
-    this.revealResult(slotItems);
+    var counters = [];
+    for (var i = 0; i < 3; i++) {
+      counters.push(Math.floor(Math.random() * 8) + 8);
+    }
+    this.revealResult(counters);
   };
 
-  View.prototype.revealResult = function(results) {
+  View.prototype.revealResult = function(counters) {
     var spinTime = 120;
     var timer;
     var that = this;
-    var counter = 10;
     (function repeat() {
-      if (--counter >= 0) {
-        that.spinReelAndShowResults(spinTime, counter, results);
+      --counters[0]
+      --counters[1]
+      --counters[2]
+      if (counters[0] >= 0 || counters[1] >= 0 || counters[2] >= 0) {
+        that.spinReelAndShowResults(spinTime, counters);
         spinTime += 20;
         timer = setTimeout(repeat, spinTime);
       }
@@ -76,44 +77,14 @@ $.SlotGame = function() {
     });
   };
 
-  View.prototype.spinReelAndShowResults = function(time, counter, results) {
+  View.prototype.spinReelAndShowResults = function(time, counters) {
     var that = this;
-    if (counter > 0) {
-      $('ul.reel').map(function(i, reel) {
-        var firstItem = $(reel).children()[0];
-        that.animateSpinning(reel, firstItem, time);
-      });
-    } else {
-      var timer;
-      (function repeat() {
-        if (!that.resultsMatch(results)) {
-          that.stopAtFinalResults(time, results);
-          time += 20;
-          timer = setTimeout(repeat, time);
-        }
-      })();
-    }
-  };
-
-  View.prototype.resultsMatch = function(results) {
-    var shownSlots = Array.prototype.slice.call($('.reel').map(function(idx, reel) {
-      return $(reel).children()[0].id;
-    }));
-    for (var i = 0; i < results.length; i++) {
-      if (shownSlots.indexOf(results[i]) < 0) {
-        return false
+    for (var i = 0; i < counters.length; i++) {
+      if (counters[i] > 0) {
+        var matchingReel = $('ul.reel')[i]
+        var firstItem = $(matchingReel).children()[0];
+        that.animateSpinning(matchingReel, firstItem, time);
       }
     }
-    return true;
   };
-
-  View.prototype.stopAtFinalResults = function(time, results) {
-    $('ul.reel').map(function(i, reel) {
-      var firstItem = $(reel).children()[0]
-      if (results.indexOf(firstItem.id) < 0) {
-        this.animateSpinning(reel, firstItem, time);
-      }
-    }.bind(this));
-  };
-
 })();
