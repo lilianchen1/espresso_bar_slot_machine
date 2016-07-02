@@ -1,12 +1,17 @@
 .machine {
   width: 500px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .reels-container {
   overflow: hidden;
   width: 380px;
   height: 160px;
-  border: 2px solid #ccc;
+  border: 2px solid #ad7338;
+  border-bottom: 10px solid #87592c;
   margin: 0 auto;
 }
 
@@ -16,7 +21,7 @@
   margin: 0;
   list-style: none;
   height: 100%;
-  border-left: 2px solid #ccc;
+  border-left: 2px solid #ad7338;
 }
 
 .reel .reel-item:nth-child(1) {
@@ -33,10 +38,27 @@
   margin-top: 10px;
 }
 
-.lever a {
-  background: red;
-  width: 20px;
-  height: 20px;
+a.lever-off {
+  background: green;
+  width: 25px;
+  height: 25px;
   display: block;
   float: right;
+  border-radius: 15px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  transition: 0.3s ease-in-out;
+}
+
+a.lever-off:hover {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+a.lever-on {
+  cursor: default;
+  background: red;
+  width: 25px;
+  height: 25px;
+  display: block;
+  float: right;
+  border-radius: 15px;
 }
