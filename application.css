@@ -1,0 +1,42 @@
+.machine {
+  width: 500px;
+}
+
+.reels-container {
+  overflow: hidden;
+  width: 380px;
+  height: 160px;
+  border: 2px solid #ccc;
+  margin: 0 auto;
+}
+
+.reel {
+  float: left;
+  padding: 0 10px 10px 10px;
+  margin: 0;
+  list-style: none;
+  height: 100%;
+  border-left: 2px solid #ccc;
+}
+
+.reel .reel-item:nth-child(1) {
+  margin-top: 10px
+}
+
+.reel-item {
+  margin-top: -300px;
+}
+
+.reel-item img {
+  width: 100px;
+  height: 90px;
+  margin-top: 10px;
+}
+
+.lever a {
+  background: red;
+  width: 20px;
+  height: 20px;
+  display: block;
+  float: right;
+}
