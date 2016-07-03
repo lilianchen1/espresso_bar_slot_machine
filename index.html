@@ -1,26 +1,31 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <title>Drink Slot Machine</title>
   </head>
   <body>
-    <div class="main">
-      <div class="machine">
+    <div class='main'>
+      <div class='machine'>
+        <div class='event-description'>
+          <p>Press the side lever for your chance to win a free drink!</p>
+        </div>
         <div class='lever'>
           <a class='lever-off' href='javascript:void(0)'></a>
         </div>
-        <div class="reels-container">
+        <div class='reels-container'>
         </div>
+        <div class='force-win'><a class='force-win-link' href='javascript:void(0)'>Click to Force Win</a></div>
       </div>
     </div>
-    <link rel="stylesheet" href="application.css" type="text/css">
-    <script type="text/javascript" src="jquery-3.0.0.js"></script>
-    <script type="text/javascript" src="javascript/application.js"></script>
-    <script type="text/javascript" src="javascript/slot_machine.js"></script>
+    <link rel='stylesheet' href='application.css' type='text/css'>
+    <script type='text/javascript' src='jquery-3.0.0.js'></script>
+    <script type='text/javascript' src='javascript/application.js'></script>
+    <script type='text/javascript' src='javascript/slot_machine.js'></script>
+    <script type='text/javascript' src='javascript/utility.js'></script>
     <script>
       $(function() {
-        $(".main").startMachine();
+        $('.main').startMachine();
       });
     </script>
   </body>

@@ -4,7 +4,8 @@ $.fn.startMachine = function() {
 
 $.SlotGame = function() {
   var $el = $("div.reels-container");
-  var game = new window.SLOTMACHINE.Game($el);
+  var game = new window.SlotMachine.Game($el);
   game.setUpMachine();
   game.listenForGameStart();
+  game.listenForForceWin();
 };
