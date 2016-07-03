@@ -12,13 +12,19 @@
   };
 
   Game.prototype.setUpMachine = function() {
-    var reelTemplate = "<ul id='reelNum' class='reel'></ul>"
-    var itemTemplate = "<li id='itemType' class='reel-item'></li>"
-    var imageTemplate = "<img src='./images/itemType.png' />"
+    var reelTemplate = "<ul id='reelNum' class='reel'>";
+    var itemTemplate = "<li id='itemType' class='reel-item'>";
+    var imageTemplate = "<img src='./images/itemType.png'>";
+    var introModalTexts = ['Click On', 'Lever Nob', 'To Start'];
     for (var reelIdx = 0; reelIdx < 3; reelIdx++) {
       var $reel = $(reelTemplate.replace('reelNum', 'reel' + reelIdx));
+      var $introModal = $("<div class='reel-modal intro-modal'>");
+      var $modalText = $("<p class='modal-text'>");
+      $modalText.text(introModalTexts[reelIdx]);
+      $introModal.append($modalText);
+      $reel.append($introModal);
       for (var itemIdx = 0; itemIdx < 3; itemIdx++) {
-        var currentItem = this.items[reelIdx][itemIdx]
+        var currentItem = this.items[reelIdx][itemIdx];
         var $item = $(itemTemplate.replace('itemType', currentItem));
         $item.append(imageTemplate.replace('itemType', currentItem));
         $reel.append($item);
@@ -30,20 +36,34 @@
   Game.prototype.listenForGameStart = function() {
     $('.lever a').on('click', function(event) {
       if (!this.reelSpinning) {
-        this.setReelTimeOut();
+        this.prepareForGameStart();
         this.startGame();
       }
     }.bind(this));
   };
 
+  Game.prototype.prepareForGameStart = function() {
+    $('.intro-modal').remove();
+    $('.event-description p').remove();
+    this.setReelTimeOut();
+  };
+
   Game.prototype.listenForForceWin = function() {
     $('a.force-win-link').on('click', function(event) {
-      if (this.forceWin) {
-        $(event.currentTarget).text('Click to Force Win');
-        this.forceWin = false;
+      if (this.reelSpinning) {
+        return;
       } else {
-        $(event.currentTarget).text('Click to Un-Force Win');
-        this.forceWin = true;
+        if (this.forceWin) {
+          console.log('This game is no longer rigged!');
+          $(event.currentTarget).text('Click to Force Win');
+          $(event.currentTarget).parent().attr('class', 'force-win');
+          this.forceWin = false;
+        } else {
+          console.log('This game is now rigged!');
+          $(event.currentTarget).text('Force Winning');
+          $(event.currentTarget).parent().attr('class', 'force-clicked');
+          this.forceWin = true;
+        }
       }
     }.bind(this));
   };
@@ -51,9 +71,9 @@
   Game.prototype.setReelTimeOut = function() {
     this.reelSpinning = true;
     $('.lever a').attr('class', 'lever-on');
-    var $text = $('<p>');
-    $text.text('The lever is spinning, Please wait...');
-    $('.event-description').html($text);
+    $('.event-description h3').text('The lever is spinning, Please wait...');
+    var $spinningGif = $("<img src='https://www.easytrip.ie/wp-content/themes/easytrip/images/loader.gif'>");
+    $('.event-description').append($spinningGif);
   };
 
   Game.prototype.removeReelTimeOut = function() {
@@ -62,17 +82,14 @@
   };
 
   Game.prototype.startGame = function() {
-    // TODO: change logic of force win so that after 5 spins, it will land on one of the items (how i had it before)
+    $('.reel-modal').remove(); // remove modal animation from previous round
     if (this.forceWin) {
-      var that = this;
-      $.when(that.resolveForceWinning(120)).then(function() {
-        that.handleGameOver();
-      });
+      this.getMatchingItems(120);
     } else {
       var counters = [];
       for (var i = 0; i < 3; i++) {
-        // counters.push(Math.floor(Math.random() * 8) + 8);
-        counters.push(Math.floor(Math.random() * 8));
+        counters.push(Math.floor(Math.random() * 8) + 8);
+        // counters.push(Math.floor(Math.random() * 5) + 2);
       }
       this.revealResult(counters);
     }
@@ -96,11 +113,24 @@
     })();
   };
 
-  Game.prototype.resolveForceWinning = function(time) {
-    var d = $.Deferred();
+  Game.prototype.getMatchingItems = function(time) {
+    var timer;
     var that = this;
-    that.getMatchingItems(time, d);
-    return d.promise();
+    var counter = 5; // forces reels to spin at least 5 times
+    (function getMatch() {
+      var item = that.itemTypes[Math.floor(Math.random() * 3)];
+      if (!that.resultsMatch(item)) {
+        for (var reelIdx = 0; reelIdx < $('.reel').length; reelIdx++) {
+          var firstItem = $($('.reel')[reelIdx]).children()[0];
+          if (firstItem.id.indexOf(item) < 0) {
+            that.animateSpinning($('.reel')[reelIdx], firstItem, time);
+          }
+        }
+        timer = setTimeout(getMatch, time);
+      } else {
+        that.handleGameOver();
+      }
+    })()
   };
 
   Game.prototype.handleGameOver = function() {
@@ -113,26 +143,47 @@
     } else {
       this.animateLosing();
     }
-    setTimeout(this.removeReelTimeOut.bind(this), 0);
+    this.animateResultModals();
+    setTimeout(this.removeReelTimeOut.bind(this, matchedItem), 0);
+    if (this.forceWin) {
+      this.removeForceWin();
+    }
+    console.log('game over!')
+  };
+
+  Game.prototype.removeForceWin = function() {
+    this.forceWin = false;
+    $('.force-win-link').parent().attr('class', 'force-win');
+    $('.force-win-link').text('Click to Force Win');
+  };
+
+  Game.prototype.animateResultModals = function() {
+    var reels = $('.reel');
+    for (var i = 0; i < reels.length; i++) {
+      var $modalTemplate = $("<div class='itemType'>");
+      var $text = $("<p class='modal-text'>");
+      var itemType = $(reels[i]).children()[0].id.split('-')[0];
+      $text.text(itemType.toUpperCase());
+      $modalTemplate.append($text);
+      $modalTemplate.attr('class', 'reel-modal-' + itemType + ' reel-modal');
+      $(reels[i]).append($modalTemplate);
+      $modalTemplate.show('fast');
+    }
   };
 
   Game.prototype.animateWinning = function(matchedItem) {
-    var $header = $('<h3>');
-    $header.text('CONGRATULATIONS');
+    $('.event-description img').remove();
     var $text = $('<p>');
     $text.text('You have won: ' + matchedItem.toUpperCase());
-    $('.event-description').html('');
-    $('.event-description').append($header);
+    $('.event-description h3').text('CONGRATULATIONS!!!');
     $('.event-description').append($text);
   };
 
   Game.prototype.animateLosing = function() {
-    var $header = $('<h3>');
-    $header.text('TRY AGAIN');
+    $('.event-description img').remove();
     var $text = $('<p>');
     $text.text('better luck next time!');
-    $('.event-description').html('');
-    $('.event-description').append($header);
+    $('.event-description h3').text('TRY AGAIN');
     $('.event-description').append($text);
   };
 
@@ -158,25 +209,6 @@
         this.animateSpinning(matchingReel, firstItem, time);
       }
     }
-  };
-
-  Game.prototype.getMatchingItems = function(time, d) {
-    var timer;
-    var that = this;
-    (function getMatch() {
-      var item = that.itemTypes[Math.floor(Math.random() * 3)];
-      if (!that.resultsMatch(item)) {
-        for (var reelIdx = 0; reelIdx < $('.reel').length; reelIdx++) {
-          var firstItem = $($('.reel')[reelIdx]).children()[0];
-          if (firstItem.id.indexOf(item) < 0) {
-            that.animateSpinning($('.reel')[reelIdx], firstItem, time);
-          }
-        }
-        timer = setTimeout(getMatch, time);
-      } else {
-        d.resolve();
-      }
-    })()
   };
 
   Game.prototype.resultsMatch = function(item) {
