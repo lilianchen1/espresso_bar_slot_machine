@@ -104,7 +104,7 @@
       --counters[1];
       --counters[2];
       if (counters[0] >= 0 || counters[1] >= 0 || counters[2] >= 0) {
-        that.spinReelAndShowResults(spinTime, counters);
+        that.spinReel(spinTime, counters);
         spinTime += 20;
         timer = setTimeout(repeat, spinTime);
       } else {
@@ -116,19 +116,25 @@
   Game.prototype.getMatchingItems = function(time) {
     var timer;
     var that = this;
-    var counter = 5; // forces reels to spin at least 5 times
+    var counter = 7; // forces reels to spin at least 7 times
     (function getMatch() {
-      var item = that.itemTypes[Math.floor(Math.random() * 3)];
-      if (!that.resultsMatch(item)) {
-        for (var reelIdx = 0; reelIdx < $('.reel').length; reelIdx++) {
-          var firstItem = $($('.reel')[reelIdx]).children()[0];
-          if (firstItem.id.indexOf(item) < 0) {
-            that.animateSpinning($('.reel')[reelIdx], firstItem, time);
-          }
-        }
+      if (--counter >= 0) {
+        that.spinReel(time, [counter, counter, counter]);
+        time += 20;
         timer = setTimeout(getMatch, time);
       } else {
-        that.handleGameOver();
+        var item = $('#reel0').children()[0].id.split('-')[0];
+        if (!that.resultsMatch(item)) {
+          for (var reelIdx = 1; reelIdx < $('.reel').length; reelIdx++) {
+            var firstItem = $($('.reel')[reelIdx]).children()[0];
+            if (firstItem.id.indexOf(item) < 0) {
+              that.animateSpinning($('.reel')[reelIdx], firstItem, time);
+            }
+          }
+          timer = setTimeout(getMatch, time);
+        } else {
+          that.handleGameOver();
+        }
       }
     })()
   };
@@ -201,7 +207,7 @@
     });
   };
 
-  Game.prototype.spinReelAndShowResults = function(time, counters) {
+  Game.prototype.spinReel = function(time, counters) {
     for (var i = 0; i < counters.length; i++) {
       if (counters[i] > 0) {
         var matchingReel = $('ul.reel')[i]
