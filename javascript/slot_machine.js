@@ -66,7 +66,7 @@
     this.reelSpinning = true;
     $('.lever a').attr('class', 'lever-on');
     $('.event-description h3').text('The lever is spinning, Please wait...');
-    var $spinningGif = $("<img src='https://www.easytrip.ie/wp-content/themes/easytrip/images/loader.gif'>");
+    var $spinningGif = $("<img src='./images/loader.gif'>");
     $('.event-description').append($spinningGif);
   };
 
@@ -130,7 +130,7 @@
           that.handleGameOver();
         }
       }
-    })()
+    })();
   };
 
   Game.prototype.handleGameOver = function() {
@@ -148,7 +148,7 @@
     if (this.forceWin) {
       this.removeForceWin();
     }
-    console.log('game over!')
+    console.log('game over!');
   };
 
   Game.prototype.removeForceWin = function() {
