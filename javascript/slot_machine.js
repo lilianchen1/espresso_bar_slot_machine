@@ -36,16 +36,10 @@
   Game.prototype.listenForGameStart = function() {
     $('.lever a').on('click', function(event) {
       if (!this.reelSpinning) {
-        this.prepareForGameStart();
+        this.setReelTimeOut();
         this.startGame();
       }
     }.bind(this));
-  };
-
-  Game.prototype.prepareForGameStart = function() {
-    $('.intro-modal').remove();
-    $('.event-description p').remove();
-    this.setReelTimeOut();
   };
 
   Game.prototype.listenForForceWin = function() {
@@ -82,14 +76,14 @@
   };
 
   Game.prototype.startGame = function() {
-    $('.reel-modal').remove(); // remove modal animation from previous round
+    $('.reel-modal').remove(); // remove modal
+    $('.event-description p').remove(); // remove end text from previous round
     if (this.forceWin) {
       this.getMatchingItems(120);
     } else {
       var counters = [];
       for (var i = 0; i < 3; i++) {
         counters.push(Math.floor(Math.random() * 8) + 8);
-        // counters.push(Math.floor(Math.random() * 5) + 2);
       }
       this.revealResult(counters);
     }
